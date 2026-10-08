@@ -1,0 +1,177 @@
+---
+/**
+ * "The Oracle": myth-or-truth quiz on a card that flips to reveal each answer.
+ * Questions come from content/oracle.ts; behaviour in scripts/sections/oracle.ts.
+ */
+import Button from '@/components/ui/Button.astro';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import { oracleQuestions } from '@/content/oracle';
+
+const total = oracleQuestions.length;
+---
+
+<section class="oracle" id="oracle" aria-labelledby="oracle-title" data-oracle>
+  <SectionHeader
+    sectionId="oracle"
+    eyebrow="The Oracle"
+    title="Myth <em>or</em> truth?"
+    lede={`${total} claims. Some are history, some are legend. Choose wisely.`}
+    align="center"
+  />
+
+  <div class="quiz" data-reveal>
+    <div class="quiz__meta label">
+      <span data-oracle-count>1 / {total}</span>
+      <span class="quiz__score" aria-live="polite" data-oracle-score>
+        Score 0
+      </span>
+    </div>
+
+    <div class="quiz__scene">
+      <div class="quiz__card" data-oracle-card>
+        <div class="quiz__face quiz__front" data-oracle-front>
+          <p class="quiz__claim" data-oracle-claim>
+            {oracleQuestions[0]?.claim}
+          </p>
+          <div class="quiz__answers" data-oracle-answers>
+            <Button variant="ghost" data-answer="myth" magnetic>
+              Myth
+            </Button>
+            <Button data-answer="truth" magnetic>
+              Truth
+            </Button>
+          </div>
+        </div>
+        <div class="quiz__face quiz__back" aria-live="polite" data-oracle-back inert>
+          <p class="quiz__verdict" data-oracle-verdict></p>
+          <p class="quiz__explain" data-oracle-explain></p>
+          <Button data-oracle-next>Next</Button>
+        </div>
+      </div>
+      <div class="quiz__sparks" aria-hidden="true" data-oracle-sparks></div>
+    </div>
+    <noscript>
+      <p class="lede">The Oracle needs JavaScript to speak.</p>
+    </noscript>
+  </div>
+</section>
+
+<script>
+  import { forEach } from '@/scripts/core/dom';
+  import { initOracle } from '@/scripts/sections/oracle';
+
+  forEach('[data-oracle]', initOracle);
+</script>
+
+<style>
+  .oracle {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: clamp(5rem, 14vh, 9rem) var(--gutter) clamp(6rem, 16vh, 10rem);
+    text-align: center;
+  }
+
+  .quiz {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .quiz__meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    color: var(--c-mute);
+  }
+
+  .quiz__score {
+    color: var(--c-gold);
+  }
+
+  .quiz__scene {
+    position: relative;
+    perspective: 1400px;
+  }
+
+  .quiz__card {
+    position: relative;
+    display: grid;
+    min-height: 22rem;
+    transform-style: preserve-3d;
+  }
+
+  .quiz__face {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    padding: clamp(2rem, 5vw, 3.5rem);
+    border: 1px solid rgb(201 164 92 / 0.2);
+    border-radius: var(--radius-lg);
+    background:
+      radial-gradient(80% 60% at 50% 0%, rgb(58 91 148 / 0.2), transparent 70%),
+      linear-gradient(170deg, var(--c-forest-2), var(--c-ink-2));
+    box-shadow: 0 40px 80px -40px rgb(0 0 0 / 0.9);
+    backface-visibility: hidden;
+  }
+
+  .quiz__back {
+    transform: rotateY(180deg);
+  }
+
+  .quiz__claim {
+    margin: 0;
+    font: 500 clamp(1.5rem, 3vw, 2.1rem) / 1.25 var(--f-serif);
+  }
+
+  .quiz__claim :global(em) {
+    color: var(--c-gold-hi);
+  }
+
+  .quiz__answers {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .quiz__answers :global(.btn) {
+    min-width: 9rem;
+  }
+
+  .quiz__verdict {
+    margin: 0;
+    font: italic 500 clamp(2.2rem, 4vw, 3rem) / 1 var(--f-serif);
+  }
+
+  .quiz__verdict:global(.is-right) {
+    color: var(--c-gold-hi);
+  }
+
+  .quiz__verdict:global(.is-wrong) {
+    color: var(--c-madder-hi);
+  }
+
+  .quiz__explain {
+    margin: 0;
+    color: var(--c-ivory-dim);
+  }
+
+  .quiz__sparks {
+    position: absolute;
+    left: 50%;
+    top: 35%;
+    pointer-events: none;
+  }
+
+  .quiz__sparks :global(i) {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    margin: -3px;
+    border-radius: 50%;
+    background: var(--c-gold-hi);
+    box-shadow: 0 0 10px var(--c-gold);
+  }
+</style>

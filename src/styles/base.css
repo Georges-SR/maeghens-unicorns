@@ -1,0 +1,130 @@
+/* Reset, document defaults, and site-wide atmosphere. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: var(--nav-h);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 800px at 80% -10%, rgb(58 91 148 / 0.22), transparent 60%),
+    radial-gradient(900px 700px at -10% 40%, rgb(13 26 23 / 0.9), transparent 70%), var(--c-ink);
+  color: var(--c-ivory);
+  font: 300 1.0625rem/1.7 var(--f-sans);
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Film grain over everything; purely decorative. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  z-index: var(--z-grain);
+  pointer-events: none;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1.2s steps(6) infinite;
+}
+
+@keyframes grain {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(-3%, 2%);
+  }
+  40% {
+    transform: translate(2%, -3%);
+  }
+  60% {
+    transform: translate(-2%, -1%);
+  }
+  80% {
+    transform: translate(3%, 3%);
+  }
+}
+
+img,
+picture,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: var(--c-gold-hi);
+  text-decoration-color: rgb(241 217 154 / 0.35);
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  text-decoration-color: currentColor;
+}
+
+::selection {
+  background: rgb(201 164 92 / 0.35);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--c-gold-hi);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/*
+ * Reveal-on-scroll. Elements start hidden only when JavaScript is running (html.js);
+ * GSAP brings them in. If scripts fail, html.reveal-fallback (set by a timer in the
+ * layout) shows everything, so content is never lost.
+ */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+}
+
+.reveal-fallback [data-reveal],
+.reduced-motion [data-reveal] {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* Reduced motion: keep fades, drop movement. GSAP code checks the same media query. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,57 @@
+---
+/** Rilke's line, then a paragraph whose words light up as you scroll through it. */
+import Ornament from '@/components/ui/Ornament.astro';
+import { prologue } from '@/content/site';
+---
+
+<section class="prologue" id="prologue" aria-label="Prologue">
+  <Ornament />
+  <blockquote class="prologue__quote">
+    <p lang={prologue.quoteLang} data-split>
+      {prologue.quote}
+    </p>
+    <p class="prologue__translation" data-reveal>
+      {prologue.translation}
+    </p>
+    <footer class="label" data-reveal set:html={prologue.attribution} />
+  </blockquote>
+  <p class="prologue__body" data-scrub-words>
+    {prologue.body}
+  </p>
+</section>
+
+<style>
+  .prologue {
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: clamp(6rem, 16vh, 11rem) var(--gutter);
+    text-align: center;
+  }
+
+  .prologue__quote {
+    margin: 0 0 4rem;
+  }
+
+  .prologue__quote p {
+    margin: 0;
+    font: italic 400 clamp(2.2rem, 5vw, 4rem) / 1.12 var(--f-serif);
+  }
+
+  .prologue__quote .prologue__translation {
+    margin-top: 1rem;
+    font-size: clamp(1.15rem, 2vw, 1.5rem);
+    color: var(--c-gold-hi);
+  }
+
+  .prologue__quote footer {
+    margin-top: 1.5rem;
+    color: var(--c-mute);
+  }
+
+  .prologue__body {
+    max-width: 46rem;
+    margin: 0 auto;
+    font: 400 clamp(1.35rem, 2.4vw, 1.9rem) / 1.45 var(--f-serif);
+    color: var(--c-ivory);
+  }
+</style>

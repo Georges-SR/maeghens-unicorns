@@ -1,0 +1,121 @@
+---
+/**
+ * The one button style. Renders an <a> when given `href`, otherwise a <button>.
+ * Extra attributes (data-*, aria-*, hidden…) pass straight through.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = Omit<HTMLAttributes<'a'> & HTMLAttributes<'button'>, 'class' | 'type'> & {
+  variant?: 'gold' | 'ghost';
+  size?: 'md' | 'sm' | 'icon';
+  /** Lean toward the cursor (see scripts/effects/pointer.ts). */
+  magnetic?: boolean;
+  class?: string;
+};
+
+const { href, variant = 'gold', size = 'md', magnetic = false, class: extra, ...rest } = Astro.props;
+const classes = ['btn', `btn--${variant}`, `btn--${size}`, extra];
+const magneticAttr = magnetic ? '' : undefined;
+---
+
+{href ? (
+  <a class:list={classes} href={href} data-magnetic={magneticAttr} {...rest}>
+    <span class="btn__label">
+      <slot />
+    </span>
+  </a>
+) : (
+  <button type="button" class:list={classes} data-magnetic={magneticAttr} {...rest}>
+    <span class="btn__label">
+      <slot />
+    </span>
+  </button>
+)}
+
+<style>
+  .btn {
+    --b: var(--c-line);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6em;
+    padding: 0.95em 1.8em;
+    overflow: hidden;
+    border: 1px solid var(--b);
+    border-radius: 999px;
+    font: 500 0.78rem/1 var(--f-sans);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      border-color 0.3s,
+      background-color 0.3s,
+      color 0.3s,
+      box-shadow 0.4s;
+  }
+
+  .btn__label {
+    position: relative;
+    z-index: 1;
+  }
+
+  .btn--gold {
+    color: var(--c-ink);
+    background: linear-gradient(135deg, var(--c-gold-hi), var(--c-gold) 55%, var(--c-gold-lo));
+    border-color: transparent;
+    box-shadow:
+      0 10px 30px -10px rgb(201 164 92 / 0.6),
+      inset 0 1px 0 rgb(255 255 255 / 0.4);
+  }
+
+  /* a sheen sweeps across on hover */
+  .btn--gold::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 0.55) 50%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 0.8s var(--ease);
+  }
+
+  .btn--gold:hover::after {
+    transform: translateX(120%);
+  }
+
+  .btn--gold:hover {
+    box-shadow:
+      0 16px 40px -10px rgb(201 164 92 / 0.8),
+      inset 0 1px 0 rgb(255 255 255 / 0.4);
+  }
+
+  .btn--ghost {
+    color: var(--c-ivory);
+    background: rgb(255 255 255 / 0.02);
+    backdrop-filter: blur(6px);
+  }
+
+  .btn--ghost:hover,
+  .btn--ghost[aria-pressed='true'] {
+    --b: var(--c-gold);
+    color: var(--c-gold-hi);
+    background: rgb(201 164 92 / 0.06);
+  }
+
+  .btn--sm {
+    padding: 0.7em 1.2em;
+  }
+
+  .btn--icon {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    letter-spacing: 0;
+    font-size: 1.1rem;
+  }
+
+  .btn:active {
+    scale: 0.97;
+  }
+</style>

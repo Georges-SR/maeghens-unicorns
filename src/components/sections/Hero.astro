@@ -1,0 +1,304 @@
+---
+/**
+ * Opening screen. Layers, back to front:
+ *   1. WebGL sky (three.js), loaded lazily — scripts/sky/SkyScene.ts
+ *   2. the same constellation as a static SVG: the fallback, and the layout box the WebGL
+ *      figure aligns to (move/resize the SVG with CSS and the 3D constellation follows)
+ *   3. title and calls to action
+ */
+import Button from '@/components/ui/Button.astro';
+import { edges, sparkles, stars } from '@/content/constellation';
+import { hero, site } from '@/content/site';
+
+const [firstLine, secondLine] = hero.titleLines;
+const pt = (name: keyof typeof stars) => ({ x: stars[name].x * 100, y: stars[name].y * 100 });
+---
+
+<section class="hero" data-hero aria-labelledby="hero-title">
+  <canvas class="hero__sky" data-hero-sky aria-hidden="true"></canvas>
+
+  <svg class="hero__constellation" data-hero-constellation viewBox="-4 -4 108 108" aria-hidden="true">
+    {edges.map((e) => {
+      const a = pt(e.from);
+      const b = pt(e.to);
+      return <line class={`edge edge--${e.kind}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y} pathLength="1" />;
+    })}
+    {(Object.keys(stars) as (keyof typeof stars)[]).map((name) => {
+      const { x, y } = pt(name);
+      return (
+        <g class="star">
+          <circle class="star__halo" cx={x} cy={y} r={stars[name].size * 1.1} />
+          <circle class="star__core" cx={x} cy={y} r={stars[name].size * 0.32} />
+          {sparkles.includes(name) && (
+            <path class="star__rays" d={`M${x - 5} ${y}H${x + 5}M${x} ${y - 5}V${y + 5}`} />
+          )}
+        </g>
+      );
+    })}
+  </svg>
+
+  <div class="hero__inner" data-hero-content>
+    <p class="eyebrow" data-reveal="manual" data-hero-in>
+      {site.tagline}
+    </p>
+    <h1 id="hero-title" class="hero__title">
+      <span class="hero__line" data-hero-line>
+        {firstLine}
+      </span>
+      <span class="hero__line hero__line--gilt gilt" data-hero-line>
+        <em>{secondLine}</em>
+      </span>
+    </h1>
+    <p class="hero__lede" data-reveal="manual" data-hero-in>
+      {hero.lede}
+    </p>
+    <div class="hero__actions" data-reveal="manual" data-hero-in>
+      <Button href={hero.primaryCta.href} magnetic>
+        {hero.primaryCta.label}
+      </Button>
+      <Button href={hero.secondaryCta.href} variant="ghost" magnetic>
+        {hero.secondaryCta.label}
+      </Button>
+    </div>
+  </div>
+
+  <p class="hero__caption" data-reveal="manual" data-hero-in aria-hidden="true">
+    <span>Monoceros</span> · {hero.caption} — <em>click the sky</em>
+  </p>
+  <a class="hero__cue" href="#prologue" aria-label="Scroll to the prologue">
+    <span></span>
+  </a>
+</section>
+
+<script>
+  import { $ } from '@/scripts/core/dom';
+  import { initHero } from '@/scripts/sections/hero';
+
+  const root = $('[data-hero]');
+  if (root) void initHero(root);
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    align-items: center;
+    min-height: 100svh;
+    padding: 7rem var(--gutter) 6rem;
+    overflow: hidden;
+    background:
+      radial-gradient(60% 50% at 72% 45%, rgb(58 91 148 / 0.25), transparent 70%),
+      radial-gradient(40% 40% at 20% 80%, rgb(18 36 31 / 0.8), transparent 70%);
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    z-index: 0;
+    height: 28vh;
+    background: linear-gradient(to bottom, transparent, var(--c-ink));
+    pointer-events: none;
+  }
+
+  .hero__sky {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+  }
+
+  /* ── constellation box: CSS decides where the unicorn sits; WebGL follows ── */
+  .hero__constellation {
+    position: absolute;
+    z-index: -1;
+    right: max(40px, 6vw);
+    top: 50%;
+    width: min(78svh, 46vw);
+    aspect-ratio: 1;
+    translate: 0 -48%;
+    overflow: visible;
+    pointer-events: none;
+    transition: opacity 1.2s var(--ease);
+  }
+
+  :global(.has-webgl) .hero__constellation {
+    opacity: 0;
+  }
+
+  @media (max-width: 900px) {
+    .hero__constellation {
+      right: 50%;
+      top: 18%;
+      width: min(92vw, 60svh);
+      translate: 50% 0;
+      opacity: 0.6;
+    }
+  }
+
+  .edge {
+    fill: none;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .edge--horn {
+    stroke: var(--c-gold-hi);
+    stroke-width: 1.6;
+    filter: drop-shadow(0 0 4px var(--c-gold-hi));
+  }
+
+  .edge--outline {
+    stroke: rgb(201 164 92 / 0.45);
+    stroke-width: 0.9;
+  }
+
+  .edge--mane {
+    stroke: rgb(127 162 220 / 0.5);
+    stroke-width: 1;
+    stroke-dasharray: 2 6;
+  }
+
+  .star__halo {
+    fill: rgb(241 217 154 / 0.12);
+  }
+
+  .star__core {
+    fill: #fff8e1;
+  }
+
+  .star__rays {
+    stroke: rgb(255 248 225 / 0.7);
+    stroke-width: 0.8;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* ── text ── */
+  .hero__inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: var(--maxw);
+    margin: 0 auto;
+    pointer-events: none;
+  }
+
+  .hero__inner :global(a) {
+    pointer-events: auto;
+  }
+
+  .hero__title {
+    margin-bottom: 2rem;
+    font-size: var(--fs-hero);
+    font-weight: 500;
+    line-height: 0.86;
+    letter-spacing: -0.025em;
+  }
+
+  .hero__line {
+    display: block;
+  }
+
+  /* hidden until the intro animation runs (or the fallback timer shows it) */
+  :global(.js) .hero__line {
+    visibility: hidden;
+  }
+
+  :global(.reveal-fallback) .hero__line,
+  :global(.reduced-motion) .hero__line {
+    visibility: visible;
+  }
+
+  .hero__line--gilt {
+    width: fit-content;
+    margin-left: 0.4em;
+    padding: 0 0.08em 0.12em 0;
+  }
+
+  .hero__lede {
+    max-width: 34rem;
+    margin: 0 0 2.5rem;
+    font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+    color: var(--c-ivory-dim);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .hero__caption {
+    position: absolute;
+    right: var(--gutter);
+    bottom: 2.2rem;
+    z-index: 1;
+    max-width: 22rem;
+    margin: 0;
+    text-align: right;
+    font: 400 0.72rem/1.4 var(--f-sans);
+    letter-spacing: 0.12em;
+    color: var(--c-mute);
+  }
+
+  .hero__caption span {
+    color: var(--c-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+  }
+
+  .hero__caption em {
+    color: var(--c-ivory-dim);
+  }
+
+  .hero__cue {
+    position: absolute;
+    left: 50%;
+    bottom: 2rem;
+    z-index: 1;
+    width: 26px;
+    height: 42px;
+    translate: -50% 0;
+    border: 1px solid var(--c-line);
+    border-radius: 20px;
+  }
+
+  .hero__cue span {
+    position: absolute;
+    left: 50%;
+    top: 8px;
+    width: 2px;
+    height: 8px;
+    margin-left: -1px;
+    border-radius: 2px;
+    background: var(--c-gold-hi);
+    animation: cue 2.2s var(--ease) infinite;
+  }
+
+  @keyframes cue {
+    0% {
+      opacity: 0;
+      transform: translateY(0);
+    }
+    30% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+  }
+
+  @media (max-width: 700px) {
+    .hero__caption {
+      display: none;
+    }
+
+    .hero__line--gilt {
+      margin-left: 0.15em;
+    }
+  }
+</style>

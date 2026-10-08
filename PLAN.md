@@ -1,77 +1,66 @@
 # Maeghen's Unicorns — development plan
 
-A single-page, animated, interactive field guide to the unicorn: where the idea came
-from, how cultures reshaped it, and where it lives in fiction today.
+A single-page, animated, interactive field guide to the unicorn: where the idea came from,
+how cultures reshaped it, and where it lives in fiction today.
 
 ## Creative direction
 
 **"Midnight tapestry."** Not pink, not candy, not glitter. The palette is taken from the
-late-medieval unicorn tapestries themselves — the world's most famous unicorn images —
-set against a night sky:
+late-medieval unicorn tapestries — the world's most famous unicorn images — set against a
+night sky. Tokens live in `src/styles/tokens.css`.
 
-| Token     | Hex       | Use                                  |
-|-----------|-----------|--------------------------------------|
-| ink       | `#070b14` | page background (midnight)           |
-| forest    | `#0d1a17` | millefleur green-black panels        |
-| ivory     | `#efe6d2` | body text, the unicorn's coat        |
-| gold      | `#c9a45c` | gilt accents, horn, lines            |
-| lapis     | `#3a5b94` | cool accent, links, sky glow         |
-| madder    | `#a2412f` | rare warm accent (tapestry red)      |
+| Token        | Hex       | Use                             |
+| ------------ | --------- | ------------------------------- |
+| `--c-ink`    | `#070b14` | page background (midnight)      |
+| `--c-forest` | `#0d1a17` | millefleur green-black panels   |
+| `--c-ivory`  | `#efe6d2` | body text, the unicorn's coat   |
+| `--c-gold`   | `#c9a45c` | gilt accents, horn, lines       |
+| `--c-lapis`  | `#3a5b94` | cool accent, sky glow           |
+| `--c-madder` | `#a2412f` | rare warm accent (tapestry red) |
 
-Type: *Cormorant Garamond* (display, literary, engraved feel) + *Inter* (UI, labels).
-Texture: subtle film grain, gilt hairlines, ornamental dividers.
+Type: _Cormorant Garamond_ (display) + _Inter_ (UI). Texture: film grain, gilt hairlines.
 
-## Sections
+## Page
 
-1. **Hero — the constellation.** A live starfield on canvas. A unicorn constellation
-   draws itself line by line; stars react to the cursor, parallax with movement, and a
-   click launches a shooting star. Gilded animated title.
-2. **Prologue.** Rilke: *"O dieses ist das Tier, das es nicht gibt."*
-3. **Origins timeline.** Pinned horizontal scroll on desktop (vertical on mobile):
-   Indus seals → Ctesias → Aristotle → Pliny → Physiologus → Aberdeen Bestiary →
-   the 1414 Ming "qilin" giraffe → the Tapestries → Raphael → Scotland's arms →
-   Ole Worm & the narwhal → the Danish throne → the Siberian "unicorn".
-4. **Across cultures.** 3D-tilt cards: Re'em, Karkadann, Qilin, Xiezhi, the Alicorn
-   trade, the Scottish unicorn.
-5. **Read the tapestry.** *The Unicorn in Captivity* with interactive hotspots that
-   decode its symbols (horn, red stains, pomegranates, fence, chain, millefleur).
-6. **Gallery.** Masonry of public-domain masterpieces with a zoomable lightbox.
-7. **In fiction.** Filterable cards (Literature / Screen / Culture) from Lewis Carroll
-   to Pixar.
-8. **The Oracle.** "Myth or truth?" — an 8-question card quiz with flip reveals and a score.
-9. **Colophon.** Credits, image licenses, dedication.
+| #   | Section         | Experience                                                                                                   |
+| --- | --------------- | ------------------------------------------------------------------------------------------------------------ |
+| —   | Hero            | three.js sky: shader nebula, 3D starfield parallax, Monoceros drawn in gold, shooting stars; SplitText title |
+| —   | Prologue        | Rilke; a paragraph whose words light up as you scroll                                                        |
+| I   | Origins         | pinned horizontal timeline, running year counter, cards focus at centre                                      |
+| II  | The Hunt        | the seven Unicorn Tapestries as a pinned scroll story: curtain wipes, camera moves, chapter dots             |
+| III | Cultures        | 3D tilt cards with a following highlight                                                                     |
+| —   | Marquee         | the unicorn's names in many languages, speed reacts to scroll velocity                                       |
+| IV  | Tapestry reader | hotspots; the tapestry zooms toward each detail                                                              |
+| V   | Gallery         | build-time balanced masonry, columns drift at different speeds, PhotoSwipe deep zoom                         |
+| VI  | Fiction         | filterable shelf animated with GSAP Flip                                                                     |
+| VII | Oracle          | myth-or-truth quiz on a flipping card, gold spark bursts, final rank                                         |
+| —   | Colophon        | dedication, generated image credits                                                                          |
 
-## Interaction & motion
+## Engineering principles
 
-- Canvas starfield + constellation (requestAnimationFrame, DPR-aware, pauses offscreen).
-- Gold-dust cursor trail (desktop pointer only).
-- IntersectionObserver reveal choreography; scroll progress hairline.
-- Pinned horizontal timeline driven by scroll position.
-- Card tilt with specular highlight; lightbox with keyboard navigation.
-- All motion honors `prefers-reduced-motion`; everything works without JS (content is
-  in the HTML).
-
-## Tech & production
-
-- Zero-build static site: semantic HTML, modern CSS, vanilla ES modules. No framework,
-  nothing to break, instant loads.
-- Images: public-domain / CC0 works from The Met Open Access and Wikimedia Commons,
-  resized to ≤1400px WebP (~0.2–0.7 MB each), lazy-loaded.
-- Hosting: GitHub Pages, deployed by a GitHub Actions workflow on every push to `main`.
-- Accessibility: landmarks, alt text, focus states, keyboard-operable hotspots/quiz/lightbox,
-  AA contrast on text.
+- Astro static output, TypeScript strictest; content as typed data, separate from markup.
+- Each section owns its markup, scoped CSS and controller; shared effects opt in via data
+  attributes.
+- Progressive motion: works without JS and with reduced motion; GSAP `matchMedia` swaps
+  layouts per breakpoint and motion preference.
+- Performance: three.js and the PhotoSwipe core load lazily; images are responsive AVIF/WebP;
+  render loops pause off-screen.
+- Quality gates in CI: Prettier, ESLint, `astro check`, build, Playwright (desktop, mobile,
+  reduced motion). Only green `main` deploys.
 
 ## Milestones
 
-- [x] M0 — folder, git repo, asset research & download
-- [x] M1 — plan & design system
-- [x] M2 — build all sections
-- [x] M3 — polish: motion, responsive, a11y, performance (first pass)
-- [x] M4 — publish to GitHub Pages — https://georges-sr.github.io/maeghens-unicorns/
+- [x] M0 — folder, repo, public-domain art research
+- [x] M1 — v1: static HTML/CSS/JS site, published to GitHub Pages
+- [x] M2 — v2 architecture: Astro + TypeScript, content model, design tokens
+- [x] M3 — v2 motion: GSAP/ScrollTrigger/SplitText/Flip, Lenis, three.js sky, PhotoSwipe
+- [x] M4 — The Hunt (seven tapestries), marquee, tapestry lens, gallery parallax
+- [x] M5 — tooling: lint, format, type-check, Playwright, CI/CD
+- [ ] M6 — next ideas (below)
 
-## Later ideas
+## Next ideas
 
 - Ambient soundtrack toggle (lute / harp, public-domain recording)
-- "Name your unicorn" generator with shareable card
-- WebGL iridescent horn in the hero
-- French translation
+- "Name your unicorn" generator with a shareable card
+- French translation (content model is ready for it: one content folder per language)
+- Lighthouse budget check in CI

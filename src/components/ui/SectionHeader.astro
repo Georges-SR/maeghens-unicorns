@@ -1,0 +1,40 @@
+---
+/**
+ * Standard section heading: numbered eyebrow, display title (lines rise in), optional lede.
+ * `title` and `lede` accept trusted inline HTML (e.g. <em> for the gilded words).
+ */
+import { section, type SectionId } from '@/content/site';
+
+interface Props {
+  sectionId: SectionId;
+  /** Overrides the eyebrow label (defaults to the section's nav label). */
+  eyebrow?: string;
+  title: string;
+  lede?: string;
+  align?: 'start' | 'center';
+  headingId?: string;
+}
+
+const { sectionId, eyebrow, title, lede, align = 'start', headingId = `${sectionId}-title` } = Astro.props;
+const { numeral, label } = section(sectionId);
+---
+
+<header class:list={['section-header', `section-header--${align}`]}>
+  <p class="eyebrow" data-reveal>
+    {numeral} · {eyebrow ?? label}
+  </p>
+  <h2 id={headingId} data-split set:html={title} />
+  {lede && <p class="lede" data-reveal set:html={lede} />}
+</header>
+
+<style>
+  .section-header {
+    max-width: 46rem;
+    margin-bottom: clamp(2.5rem, 6vh, 4rem);
+  }
+
+  .section-header--center {
+    margin-inline: auto;
+    text-align: center;
+  }
+</style>

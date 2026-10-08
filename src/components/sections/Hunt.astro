@@ -1,0 +1,268 @@
+---
+/**
+ * "The Hunt": the seven Unicorn Tapestries as one story.
+ * Base layout: a list of chapters (art + text). With motion enabled, scripts/sections/hunt.ts
+ * stacks them into a pinned stage and scroll drives curtain wipes between tapestries.
+ */
+import ArtPicture from '@/components/ui/ArtPicture.astro';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import { artwork } from '@/content/artworks';
+import { hunt, huntIntro } from '@/content/hunt';
+---
+
+<section class="hunt" id="hunt" aria-labelledby="hunt-title" data-hunt>
+  <div class="hunt__intro">
+    <SectionHeader
+      sectionId="hunt"
+      eyebrow="The Hunt"
+      title="The Hunt of the <em>Unicorn</em>"
+      lede={huntIntro.body}
+      headingId="hunt-title"
+    />
+  </div>
+
+  <div class="hunt__stage" data-hunt-stage>
+    <ol class="hunt__chapters">
+      {hunt.map((chapter, i) => {
+        const art = artwork(chapter.artworkId);
+        return (
+          <li
+            class="chapter"
+            data-chapter
+            style={`--fx:${chapter.focus.x}%;--fy:${chapter.focus.y}%`}
+            aria-label={`Chapter ${chapter.numeral}: ${chapter.title}`}
+          >
+            <figure class="chapter__art" data-reveal>
+              <ArtPicture
+                art={art}
+                sizes="(min-width: 900px) 60vw, 100vw"
+                loading={i < 2 ? 'eager' : 'lazy'}
+              />
+            </figure>
+            <div class="chapter__text" data-reveal>
+              <span class="chapter__numeral" aria-hidden="true">
+                {chapter.numeral}
+              </span>
+              <h3>{chapter.title}</h3>
+              <p set:html={chapter.body} />
+              <p class="chapter__credit label">
+                <cite>{art.title}</cite> · {art.date}
+              </p>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+
+    <nav class="hunt__dots" aria-label="Hunt chapters" data-hunt-dots hidden>
+      {hunt.map((chapter, i) => (
+        <button type="button" data-hunt-dot={i} aria-label={`Chapter ${chapter.numeral}: ${chapter.title}`}>
+          {chapter.numeral}
+        </button>
+      ))}
+    </nav>
+  </div>
+</section>
+
+<script>
+  import { $ } from '@/scripts/core/dom';
+  import { initHunt } from '@/scripts/sections/hunt';
+
+  const root = $('[data-hunt]');
+  if (root) initHunt(root);
+</script>
+
+<style>
+  .hunt__intro {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: clamp(5rem, 14vh, 9rem) var(--gutter) 2rem;
+  }
+
+  /* ── base: a list of chapters ── */
+  .hunt__chapters {
+    display: grid;
+    gap: clamp(3rem, 8vh, 6rem);
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0 var(--gutter) 4rem;
+    list-style: none;
+  }
+
+  .chapter {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: center;
+  }
+
+  .chapter__art {
+    margin: 0;
+    overflow: hidden;
+    border-radius: 6px;
+    aspect-ratio: 1;
+    box-shadow:
+      0 50px 100px -40px rgb(0 0 0 / 1),
+      0 0 0 1px rgb(201 164 92 / 0.25);
+  }
+
+  .chapter__art :global(img) {
+    object-position: var(--fx) var(--fy);
+  }
+
+  .chapter__numeral {
+    display: block;
+    margin-bottom: 0.5rem;
+    font: italic 500 clamp(3rem, 6vw, 5.5rem) / 1 var(--f-serif);
+    color: var(--c-gold);
+    opacity: 0.85;
+  }
+
+  .chapter__text h3 {
+    margin-bottom: 1.2rem;
+    font-size: clamp(2rem, 3.4vw, 3rem);
+  }
+
+  .chapter__text p {
+    margin: 0;
+    font-size: 1.08rem;
+    color: var(--c-ivory-dim);
+  }
+
+  .chapter__text .chapter__credit {
+    margin-top: 1.6rem;
+    color: var(--c-mute);
+  }
+
+  @media (max-width: 900px) {
+    .chapter {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ── staged: pinned, stacked chapters (class added by the script) ── */
+  .hunt:global(.is-staged) .hunt__stage {
+    position: relative;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  .hunt:global(.is-staged) .hunt__chapters {
+    display: block;
+    height: 100%;
+    max-width: none;
+    padding: 0;
+  }
+
+  .hunt:global(.is-staged) .chapter {
+    position: absolute;
+    inset: 0;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .hunt:global(.is-staged) .chapter__art {
+    height: 100%;
+    aspect-ratio: auto;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .hunt:global(.is-staged) .chapter__art::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 70%, var(--c-ink));
+    pointer-events: none;
+  }
+
+  .hunt:global(.is-staged) .chapter__art {
+    position: relative;
+  }
+
+  .hunt:global(.is-staged) .chapter__art :global(img) {
+    transform-origin: var(--fx) var(--fy);
+  }
+
+  .hunt:global(.is-staged) .chapter__text {
+    max-width: 30rem;
+    padding: 0 var(--gutter) 0 clamp(2rem, 4vw, 4rem);
+  }
+
+  .hunt__dots {
+    position: absolute;
+    right: var(--gutter);
+    bottom: 2rem;
+    z-index: 2;
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .hunt__dots button {
+    min-width: 2.4rem;
+    height: 2.4rem;
+    padding: 0 0.4rem;
+    border: 1px solid var(--c-line);
+    border-radius: 999px;
+    background: rgb(7 11 20 / 0.6);
+    color: var(--c-mute);
+    font: italic 500 0.95rem/1 var(--f-serif);
+    cursor: pointer;
+    transition:
+      color 0.3s,
+      border-color 0.3s,
+      background-color 0.3s;
+  }
+
+  .hunt__dots button:hover,
+  .hunt__dots button[aria-current='step'] {
+    color: var(--c-ink);
+    background: var(--c-gold);
+    border-color: var(--c-gold);
+  }
+
+  @media (max-width: 900px) {
+    .hunt:global(.is-staged) .chapter {
+      grid-template-columns: 1fr;
+      grid-template-rows: 58% 42%;
+    }
+
+    .hunt:global(.is-staged) .chapter__art::after {
+      background: linear-gradient(180deg, transparent 70%, var(--c-ink));
+    }
+
+    .hunt:global(.is-staged) .chapter__text {
+      align-self: start;
+      padding: 1.2rem var(--gutter) 0;
+    }
+
+    .hunt:global(.is-staged) .chapter__numeral {
+      font-size: 2.4rem;
+    }
+
+    .hunt:global(.is-staged) .chapter__text h3 {
+      margin-bottom: 0.6rem;
+      font-size: 1.7rem;
+    }
+
+    .hunt:global(.is-staged) .chapter__text p {
+      font-size: 0.95rem;
+    }
+
+    .hunt:global(.is-staged) .chapter__credit {
+      display: none;
+    }
+
+    .hunt__dots {
+      left: var(--gutter);
+      right: auto;
+      bottom: 1rem;
+    }
+
+    .hunt__dots button {
+      min-width: 2rem;
+      height: 2rem;
+      font-size: 0.8rem;
+    }
+  }
+</style>

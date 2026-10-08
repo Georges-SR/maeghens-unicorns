@@ -1,0 +1,215 @@
+---
+/**
+ * "Read the tapestry": glowing hotspots on The Unicorn Rests in a Garden.
+ * Selecting one zooms the tapestry toward it and explains the symbol (scripts/sections/tapestry.ts).
+ */
+import ArtPicture from '@/components/ui/ArtPicture.astro';
+import Button from '@/components/ui/Button.astro';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import { artwork } from '@/content/artworks';
+import { tapestryDetails, tapestryIntro } from '@/content/tapestry';
+
+const art = artwork('hunt-captivity');
+const total = tapestryDetails.length;
+---
+
+<section class="reader" id="tapestry" aria-labelledby="tapestry-title" data-reader>
+  <SectionHeader
+    sectionId="tapestry"
+    eyebrow="Close reading"
+    title="Read the <em>tapestry</em>"
+    lede="<cite>The Unicorn Rests in a Garden</cite>, woven around 1495–1505, is perhaps the most famous unicorn image in the world. Every detail is a sign. Select a point of light to decode it."
+  />
+
+  <div class="reader__stage">
+    <div class="reader__frame" data-reveal>
+      <div class="reader__lens" data-reader-lens>
+        <ArtPicture art={art} sizes="(min-width: 900px) 50vw, 92vw" />
+        {tapestryDetails.map((d, i) => (
+          <button
+            type="button"
+            class="spot"
+            style={`--x:${d.x}%;--y:${d.y}%;--delay:${(i % 3) * 0.6}s`}
+            data-spot={d.id}
+            aria-pressed="false"
+            aria-label={`${i + 1} of ${total}: ${d.label}`}
+          >
+            <span />
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <aside class="reader__panel" aria-live="polite" data-reveal>
+      <div class="reader__entry" data-entry="intro">
+        <p class="eyebrow">{tapestryIntro.eyebrow}</p>
+        <h3>{tapestryIntro.title}</h3>
+        <p set:html={tapestryIntro.body} />
+      </div>
+      {tapestryDetails.map((d, i) => (
+        <div class="reader__entry" data-entry={d.id} hidden>
+          <p class="eyebrow">
+            Detail · {i + 1} of {total}
+          </p>
+          <h3>{d.title}</h3>
+          <p set:html={d.body} />
+        </div>
+      ))}
+      <div class="reader__nav">
+        <Button variant="ghost" size="icon" data-step="-1" aria-label="Previous detail">
+          ←
+        </Button>
+        <Button variant="ghost" size="icon" data-step="1" aria-label="Next detail">
+          →
+        </Button>
+        <Button variant="ghost" size="sm" data-reader-reset hidden>
+          Whole tapestry
+        </Button>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<script>
+  import { forEach } from '@/scripts/core/dom';
+  import { initTapestryReader } from '@/scripts/sections/tapestry';
+
+  forEach('[data-reader]', initTapestryReader);
+</script>
+
+<style>
+  .reader {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: clamp(5rem, 14vh, 9rem) var(--gutter);
+  }
+
+  .reader__stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: center;
+  }
+
+  .reader__frame {
+    margin: 11px;
+    overflow: hidden;
+    border-radius: 6px;
+    box-shadow:
+      0 50px 100px -40px rgb(0 0 0 / 1),
+      0 0 0 1px rgb(201 164 92 / 0.25),
+      0 0 0 10px rgb(13 26 23 / 0.8),
+      0 0 0 11px rgb(201 164 92 / 0.25);
+  }
+
+  .reader__lens {
+    position: relative;
+    transform-origin: 50% 50%;
+  }
+
+  .spot {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin: -22px 0 0 -22px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .spot span {
+    position: relative;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff 0 20%, var(--c-gold-hi) 40%, rgb(241 217 154 / 0) 72%);
+    box-shadow:
+      0 0 0 1px rgb(255 248 225 / 0.8),
+      0 0 18px 4px rgb(241 217 154 / 0.65);
+    transition: transform 0.4s var(--ease-spring);
+  }
+
+  .spot span::after {
+    content: '';
+    position: absolute;
+    inset: -9px;
+    border: 1px solid rgb(241 217 154 / 0.7);
+    border-radius: 50%;
+    animation: ping 2.6s var(--ease) infinite;
+    animation-delay: var(--delay);
+  }
+
+  @keyframes ping {
+    0% {
+      transform: scale(0.6);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(2.2);
+      opacity: 0;
+    }
+  }
+
+  .spot:hover span,
+  .spot[aria-pressed='true'] span {
+    transform: scale(1.5);
+  }
+
+  .spot[aria-pressed='true'] span {
+    background: radial-gradient(circle, #fff 0 25%, var(--c-gold) 60%, rgb(201 164 92 / 0) 75%);
+  }
+
+  .reader__panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 24rem;
+    padding: clamp(2rem, 4vw, 3rem);
+    border: 1px solid rgb(201 164 92 / 0.16);
+    border-radius: 20px;
+    background: linear-gradient(160deg, rgb(18 36 31 / 0.7), rgb(11 17 32 / 0.7));
+  }
+
+  .reader__entry h3 {
+    margin-bottom: 1.2rem;
+    font-size: clamp(2rem, 3.4vw, 2.8rem);
+  }
+
+  .reader__entry p:not(.eyebrow) {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--c-ivory-dim);
+  }
+
+  .reader__entry :global(strong) {
+    font-weight: 500;
+    color: var(--c-gold-hi);
+  }
+
+  .reader__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: auto;
+    padding-top: 2rem;
+  }
+
+  @media (max-width: 900px) {
+    .reader__stage {
+      grid-template-columns: 1fr;
+    }
+
+    .reader__frame {
+      max-width: 520px;
+      margin-inline: auto;
+    }
+
+    .reader__panel {
+      min-height: 0;
+    }
+  }
+</style>

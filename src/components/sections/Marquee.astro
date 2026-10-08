@@ -1,0 +1,90 @@
+---
+/**
+ * Two bands of the unicorn's names in many languages, drifting in opposite directions.
+ * Scrolling faster makes them run faster (scripts/sections/marquee.ts). Decorative only.
+ */
+const names = [
+  'Monoceros',
+  'Licorne',
+  'Einhorn',
+  'Unicornio',
+  'Eenhoorn',
+  'Enhjørning',
+  'Unicorno',
+  'Jednorożec',
+  'Единорог',
+  'Ikkakujū',
+  'Karkadann',
+  'Qilin',
+  'Re’em',
+  'Alicorn',
+];
+const rows = [names, [...names].reverse()];
+---
+
+<div class="marquee" aria-hidden="true" data-marquee>
+  {rows.map((row, r) => (
+    <div
+      class:list={['marquee__row', { 'marquee__row--outline': r === 1 }]}
+      data-marquee-row={r === 0 ? 1 : -1}
+    >
+      {[0, 1].map(() => (
+        <div class="marquee__set">
+          {row.map((name) => (
+            <span class="marquee__item">
+              {name}
+              <i>✦</i>
+            </span>
+          ))}
+        </div>
+      ))}
+    </div>
+  ))}
+</div>
+
+<script>
+  import { forEach } from '@/scripts/core/dom';
+  import { initMarquee } from '@/scripts/sections/marquee';
+
+  forEach('[data-marquee]', initMarquee);
+</script>
+
+<style>
+  .marquee {
+    padding: 2rem 0 4rem;
+    overflow: hidden;
+    border-block: 1px solid var(--c-line-soft);
+    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  }
+
+  .marquee__row {
+    display: flex;
+    width: max-content;
+    white-space: nowrap;
+  }
+
+  .marquee__set {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .marquee__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    padding-right: 0.5em;
+    font: italic 400 clamp(3rem, 8vw, 7rem) / 1.15 var(--f-serif);
+    color: var(--c-ivory);
+  }
+
+  .marquee__item i {
+    font-style: normal;
+    font-size: 0.35em;
+    color: var(--c-gold);
+  }
+
+  .marquee__row--outline .marquee__item {
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(201 164 92 / 0.55);
+  }
+</style>

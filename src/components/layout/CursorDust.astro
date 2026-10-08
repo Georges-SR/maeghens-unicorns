@@ -1,0 +1,24 @@
+---
+/** Full-screen canvas for the gold-dust cursor trail (mouse users only). */
+---
+
+<canvas class="cursor-dust" aria-hidden="true" data-cursor-dust></canvas>
+
+<script>
+  import { $ } from '@/scripts/core/dom';
+  import { initCursorDust } from '@/scripts/effects/cursor-dust';
+
+  const canvas = $<HTMLCanvasElement>('[data-cursor-dust]');
+  if (canvas) initCursorDust(canvas);
+</script>
+
+<style>
+  .cursor-dust {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-cursor);
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+</style>

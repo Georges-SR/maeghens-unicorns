@@ -1,0 +1,94 @@
+---
+/**
+ * The document shell: <head> metadata, fonts, global styles, site chrome and the boot script.
+ * Pages provide their sections through the default slot.
+ */
+import '@fontsource-variable/cormorant-garamond/wght.css';
+import '@fontsource-variable/cormorant-garamond/wght-italic.css';
+import '@fontsource-variable/inter/wght.css';
+import '@/styles/tokens.css';
+import '@/styles/base.css';
+import '@/styles/typography.css';
+
+import { getImage } from 'astro:assets';
+import Colophon from '@/components/layout/Colophon.astro';
+import CursorDust from '@/components/layout/CursorDust.astro';
+import SiteNav from '@/components/layout/SiteNav.astro';
+import { artwork } from '@/content/artworks';
+import { site } from '@/content/site';
+import { withBase } from '@/lib/paths';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = site.title, description = site.description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = await getImage({ src: artwork('hunt-captivity').image, width: 1200, format: 'jpg' });
+const ogImageUrl = new URL(ogImage.src, Astro.site);
+const favicon = withBase('favicon.svg');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#070b14" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={favicon} type="image/svg+xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!--
+      Mark JS as available before first paint so reveal animations start hidden.
+      Safety net: if the boot script has not signalled readiness after 4s, show everything.
+    -->
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      setTimeout(function () {
+        if (!document.documentElement.dataset.ready)
+          document.documentElement.classList.add('reveal-fallback');
+      }, 4000);
+    </script>
+    <script>
+      import '@/scripts/boot';
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#prologue">
+      Skip to content
+    </a>
+    <SiteNav />
+    <main id="top">
+      <slot />
+    </main>
+    <Colophon />
+    <CursorDust />
+  </body>
+</html>
+
+<style>
+  .skip-link {
+    position: absolute;
+    left: 16px;
+    top: -60px;
+    z-index: 200;
+    padding: 0.5em 1em;
+    border-radius: 6px;
+    background: var(--c-gold);
+    color: var(--c-ink);
+  }
+
+  .skip-link:focus {
+    top: 16px;
+  }
+</style>

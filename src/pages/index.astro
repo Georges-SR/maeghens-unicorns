@@ -1,0 +1,31 @@
+---
+/**
+ * The page, in reading order. Each section is self-contained: markup, scoped styles and
+ * its own script. To add, remove or reorder a section, edit this list and `sections` in
+ * src/content/site.ts (which drives the navigation).
+ */
+import Cultures from '@/components/sections/Cultures.astro';
+import Fiction from '@/components/sections/Fiction.astro';
+import Gallery from '@/components/sections/Gallery.astro';
+import Hero from '@/components/sections/Hero.astro';
+import Hunt from '@/components/sections/Hunt.astro';
+import Marquee from '@/components/sections/Marquee.astro';
+import Oracle from '@/components/sections/Oracle.astro';
+import Prologue from '@/components/sections/Prologue.astro';
+import TapestryReader from '@/components/sections/TapestryReader.astro';
+import Timeline from '@/components/sections/Timeline.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+---
+
+<BaseLayout>
+  <Hero />
+  <Prologue />
+  <Timeline />
+  <Hunt />
+  <Cultures />
+  <Marquee />
+  <TapestryReader />
+  <Gallery />
+  <Fiction />
+  <Oracle />
+</BaseLayout>

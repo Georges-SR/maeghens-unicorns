@@ -1,0 +1,91 @@
+---
+/** Footer: dedication, full image credits (generated from the artworks list) and a way home. */
+import Button from '@/components/ui/Button.astro';
+import Ornament from '@/components/ui/Ornament.astro';
+import { artworks } from '@/content/artworks';
+import { site } from '@/content/site';
+---
+
+<footer class="colophon">
+  <Ornament />
+  <p class="colophon__dedication" data-reveal set:html={site.dedication} />
+
+  <details class="credits" data-reveal>
+    <summary class="label">Image credits</summary>
+    <ul>
+      {artworks.map((a) => (
+        <li>
+          <a href={a.sourceUrl} rel="noopener" target="_blank">
+            <cite>{a.title}</cite>
+          </a>
+          {`— ${a.maker}, ${a.date}. ${a.collection}. ${a.license}.`}
+        </li>
+      ))}
+    </ul>
+  </details>
+
+  <p class="colophon__fine" data-reveal>
+    Built with Astro, GSAP, Lenis and three.js · Fonts: Cormorant Garamond &amp; Inter ·
+    <a href={site.repoUrl} rel="noopener">
+      Source on GitHub
+    </a>
+  </p>
+
+  <Button href="#top" variant="ghost" magnetic>
+    Return to the stars ↑
+  </Button>
+</footer>
+
+<style>
+  .colophon {
+    padding: 7rem var(--gutter) 4rem;
+    text-align: center;
+    border-top: 1px solid rgb(201 164 92 / 0.1);
+    background: linear-gradient(to bottom, transparent, rgb(13 26 23 / 0.6));
+  }
+
+  .colophon__dedication {
+    margin: 0 0 2.5rem;
+    font: italic 400 clamp(2rem, 4vw, 3rem) / 1.2 var(--f-serif);
+  }
+
+  .colophon__dedication :global(em) {
+    color: var(--c-gold-hi);
+  }
+
+  .credits {
+    max-width: 52rem;
+    margin: 0 auto 2rem;
+    text-align: left;
+  }
+
+  .credits summary {
+    width: fit-content;
+    margin: 0 auto;
+    color: var(--c-gold);
+    cursor: pointer;
+  }
+
+  .credits ul {
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    columns: 2 22rem;
+    column-gap: 2.5rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--c-mute);
+  }
+
+  .credits li {
+    margin-bottom: 0.7rem;
+    break-inside: avoid;
+  }
+
+  .colophon__fine {
+    max-width: 44rem;
+    margin: 0 auto 2.5rem;
+    font-size: 0.8rem;
+    color: var(--c-mute);
+  }
+</style>

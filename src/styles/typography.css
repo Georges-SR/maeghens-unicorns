@@ -1,0 +1,93 @@
+/* Type scale and shared text treatments. */
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--f-serif);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: var(--fs-h2);
+}
+
+h3 {
+  font-size: var(--fs-h3);
+}
+
+h1 em,
+h2 em {
+  font-weight: 400;
+  color: var(--c-gold-hi);
+}
+
+em,
+cite {
+  font-style: italic;
+}
+
+/* Small-caps label with a leading rule. */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9em;
+  margin: 0 0 1.25rem;
+  font: 500 var(--fs-label) / 1 var(--f-sans);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--c-gold);
+}
+
+.eyebrow::before {
+  content: '';
+  width: 2.2em;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.7;
+}
+
+/* Spaced uppercase meta text (dates, regions, credits). */
+.label {
+  font: 500 var(--fs-label) / 1.3 var(--f-sans);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+/* Animated gold-leaf text. */
+.gilt {
+  background: var(--g-gilt);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 7s var(--ease) infinite;
+}
+
+.gilt em {
+  color: transparent;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  60%,
+  100% {
+    background-position: -50% 0;
+  }
+}
+
+.lede {
+  margin: 1.5rem 0 0;
+  font-size: var(--fs-lede);
+  color: var(--c-ivory-dim);
+}
+
+/* SplitText line masks must not clip descenders of the display serif. */
+.split-line {
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}

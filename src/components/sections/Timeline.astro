@@ -1,0 +1,277 @@
+---
+/**
+ * "Origins". Base layout (mobile, reduced motion, no JS): a vertical rail of events.
+ * On desktop with motion, scripts/sections/timeline.ts pins the section and turns the
+ * rail into a horizontal track driven by vertical scrolling.
+ */
+import ArtPicture from '@/components/ui/ArtPicture.astro';
+import { artwork } from '@/content/artworks';
+import { section } from '@/content/site';
+import { timeline } from '@/content/timeline';
+
+const { numeral } = section('origins');
+const first = timeline[0]?.marker ?? '';
+---
+
+<section class="timeline" id="origins" aria-labelledby="origins-title" data-timeline>
+  <div class="timeline__viewport">
+    <header class="timeline__head">
+      <p class="eyebrow" data-reveal>
+        {numeral} · Origins
+      </p>
+      <h2 id="origins-title" data-split>
+        Four thousand years <em>of a single horn</em>
+      </h2>
+      <div class="timeline__meter" aria-hidden="true">
+        <span class="timeline__year" data-timeline-year>
+          {first}
+        </span>
+        <i>
+          <b data-timeline-progress></b>
+        </i>
+      </div>
+    </header>
+
+    <ol class="timeline__track" data-timeline-track>
+      {timeline.map((event) => {
+        const art = event.artworkId ? artwork(event.artworkId) : null;
+        return (
+          <li class="event" data-marker={event.marker} data-reveal>
+            {art && (
+              <figure class="event__img">
+                <ArtPicture art={art} sizes="(min-width: 900px) 360px, 90vw" />
+              </figure>
+            )}
+            <p class="event__date label">{event.date}</p>
+            <h3>{event.title}</h3>
+            <p class="event__body" set:html={event.body} />
+          </li>
+        );
+      })}
+    </ol>
+  </div>
+</section>
+
+<script>
+  import { $ } from '@/scripts/core/dom';
+  import { initTimeline } from '@/scripts/sections/timeline';
+
+  const root = $('[data-timeline]');
+  if (root) initTimeline(root);
+</script>
+
+<style>
+  .timeline__viewport {
+    padding: 4rem 0;
+  }
+
+  .timeline__head {
+    position: relative;
+    max-width: var(--maxw);
+    margin: 0 auto 3rem;
+    padding: 0 var(--gutter);
+  }
+
+  .timeline__meter {
+    display: none;
+  }
+
+  /* ── base: vertical rail ── */
+  .timeline__track {
+    position: relative;
+    display: grid;
+    gap: 1.5rem;
+    max-width: 44rem;
+    margin: 0 auto;
+    padding: 0 var(--gutter) 0 calc(var(--gutter) + 2rem);
+    list-style: none;
+  }
+
+  .timeline__track::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--gutter) + 0.4rem);
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--c-gold) 8%, var(--c-gold) 92%, transparent);
+    opacity: 0.5;
+  }
+
+  .event {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1.8rem 2.2rem;
+    border: 1px solid rgb(201 164 92 / 0.14);
+    border-radius: var(--radius);
+    background: linear-gradient(170deg, rgb(18 36 31 / 0.55), rgb(11 17 32 / 0.55));
+    backdrop-filter: blur(6px);
+  }
+
+  /* rail dot */
+  .event::after {
+    content: '';
+    position: absolute;
+    left: calc(-2rem + 0.4rem - 4px);
+    top: 2.3rem;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--c-gold-hi);
+    box-shadow: 0 0 12px var(--c-gold);
+  }
+
+  .event::before {
+    content: '';
+    position: absolute;
+    left: 1.8rem;
+    top: -1px;
+    width: 3rem;
+    height: 1px;
+    background: linear-gradient(90deg, var(--c-gold-hi), transparent);
+  }
+
+  .event__img {
+    margin: -0.6rem -0.6rem 1.5rem;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: 12px;
+    background: var(--c-forest);
+  }
+
+  .event__img :global(img) {
+    transition: transform 1.2s var(--ease);
+  }
+
+  .event:hover .event__img :global(img) {
+    transform: scale(1.06);
+  }
+
+  .event__date {
+    margin: 0 0 0.6rem;
+    color: var(--c-gold);
+  }
+
+  .event h3 {
+    margin-bottom: 0.8rem;
+  }
+
+  .event__body {
+    margin: 0;
+    font-size: 0.98rem;
+    color: var(--c-ivory-dim);
+  }
+
+  /* ── enhanced: pinned horizontal track (class added by the script) ── */
+  .timeline:global(.is-horizontal) .timeline__viewport {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    height: 100svh;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .timeline:global(.is-horizontal) .timeline__head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 2rem;
+    width: 100%;
+    margin: 0 auto;
+    padding-top: clamp(4.5rem, 11vh, 7rem);
+  }
+
+  .timeline:global(.is-horizontal) .timeline__head .eyebrow {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+
+  .timeline:global(.is-horizontal) .timeline__head h2 {
+    font-size: clamp(2.2rem, 3.8vw, 3.6rem);
+  }
+
+  .timeline:global(.is-horizontal) .timeline__meter {
+    display: grid;
+    justify-items: end;
+    gap: 0.8rem;
+    min-width: 16rem;
+  }
+
+  .timeline__year {
+    font: italic 500 clamp(2rem, 3.4vw, 3rem) / 1 var(--f-serif);
+    color: var(--c-gold-hi);
+    font-variant-numeric: oldstyle-nums;
+  }
+
+  .timeline__meter i {
+    position: relative;
+    display: block;
+    width: 16rem;
+    height: 1px;
+    background: rgb(201 164 92 / 0.2);
+  }
+
+  .timeline__meter b {
+    position: absolute;
+    inset: 0;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    background: var(--c-gold-hi);
+    box-shadow: 0 0 10px var(--c-gold);
+  }
+
+  .timeline:global(.is-horizontal) .timeline__track {
+    display: flex;
+    align-items: center;
+    align-self: center;
+    justify-self: start;
+    gap: 1.5rem;
+    width: max-content;
+    max-width: none;
+    margin: 0;
+    padding: 1.5rem 30vw 2.5rem max(var(--gutter), calc((100vw - var(--maxw)) / 2 + var(--gutter)));
+    will-change: transform;
+  }
+
+  .timeline:global(.is-horizontal) .timeline__track::before {
+    left: 0;
+    right: 0;
+    top: 50%;
+    bottom: auto;
+    width: auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--c-gold) 4%, var(--c-gold) 96%, transparent);
+    opacity: 0.25;
+  }
+
+  .timeline:global(.is-horizontal) .event {
+    flex: 0 0 360px;
+    padding: 1.7rem 1.6rem 1.8rem;
+  }
+
+  .timeline:global(.is-horizontal) .event::after {
+    display: none;
+  }
+
+  .timeline:global(.is-horizontal) .event:nth-child(even) {
+    translate: 0 1.25rem;
+  }
+
+  .timeline:global(.is-horizontal) .event__img {
+    aspect-ratio: 16 / 9;
+    margin-bottom: 1.2rem;
+  }
+
+  .timeline:global(.is-horizontal) .event__body {
+    font-size: 0.94rem;
+    line-height: 1.62;
+  }
+
+  @media (max-height: 740px) {
+    .timeline:global(.is-horizontal) .event__img {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,192 @@
+---
+/**
+ * Gallery: a three-column masonry balanced at build time (each work goes to the shortest
+ * column), columns drifting at different speeds on scroll, and PhotoSwipe for a zoomable
+ * full-screen view. Without JS, each tile links straight to the large image.
+ */
+import { getImage } from 'astro:assets';
+import ArtPicture from '@/components/ui/ArtPicture.astro';
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import { artwork, galleryIds } from '@/content/artworks';
+
+const COLUMNS = 3;
+/** Parallax speed per column; the middle one runs against the others. */
+const COLUMN_SPEEDS = [0.12, -0.18, 0.24];
+
+const items = await Promise.all(
+  galleryIds.map(async (id) => {
+    const art = artwork(id);
+    const width = Math.min(2000, art.image.width);
+    const large = await getImage({ src: art.image, width, format: 'webp' });
+    return { art, href: large.src, width, height: Math.round((width * art.image.height) / art.image.width) };
+  }),
+);
+
+const columns = Array.from({ length: COLUMNS }, () => ({ height: 0, items: [] as typeof items }));
+for (const item of items) {
+  const shortest = columns.reduce((a, b) => (b.height < a.height ? b : a));
+  shortest.items.push(item);
+  shortest.height += item.height / item.width;
+}
+---
+
+<section class="gallery" id="gallery" aria-labelledby="gallery-title">
+  <SectionHeader
+    sectionId="gallery"
+    title="Masterpieces of the <em>mythical</em>"
+    lede="Five thousand years of unicorns in clay, thread, paint and ink. Select any work to see it larger, and zoom right into the weave."
+  />
+
+  <div class="gallery__grid" data-gallery>
+    {columns.map((column, c) => (
+      <div class="gallery__col" data-parallax={COLUMN_SPEEDS[c]}>
+        {column.items.map(({ art, href, width, height }) => (
+          <figure class="tile" data-reveal>
+            <a
+              class="tile__link"
+              href={href}
+              data-pswp-width={width}
+              data-pswp-height={height}
+              target="_blank"
+              rel="noopener"
+              aria-label={`View larger: ${art.title}`}
+            >
+              <ArtPicture art={art} sizes="(min-width: 900px) 30vw, (min-width: 600px) 45vw, 92vw" />
+            </a>
+            <figcaption>
+              <strong>{art.title}</strong>
+              <span>
+                {art.maker}, {art.date} · {art.collection}
+              </span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    ))}
+  </div>
+</section>
+
+<script>
+  import { forEach } from '@/scripts/core/dom';
+  import { initGallery } from '@/scripts/sections/gallery';
+
+  forEach('[data-gallery]', initGallery);
+</script>
+
+<style>
+  .gallery {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: clamp(5rem, 14vh, 9rem) var(--gutter) clamp(7rem, 18vh, 12rem);
+  }
+
+  .gallery__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .tile {
+    margin: 0 0 1.75rem;
+  }
+
+  .tile__link {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border-radius: 14px;
+    background: var(--c-forest);
+    cursor: zoom-in;
+  }
+
+  .tile__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(7 11 20 / 0.55), transparent 40%);
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+
+  .tile__link :global(img) {
+    filter: saturate(0.92);
+    transition:
+      transform 1.4s var(--ease),
+      filter 0.8s;
+  }
+
+  .tile__link:hover :global(img) {
+    transform: scale(1.05);
+    filter: saturate(1.05);
+  }
+
+  .tile__link:hover::after {
+    opacity: 1;
+  }
+
+  .tile figcaption {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.8rem 0.2rem 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--c-mute);
+  }
+
+  .tile figcaption strong {
+    font: 500 1.12rem/1.3 var(--f-serif);
+    color: var(--c-ivory);
+  }
+
+  @media (max-width: 900px) {
+    .gallery__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .gallery__col:last-child {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .gallery__grid,
+    .gallery__col:last-child {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* PhotoSwipe theme (its DOM lives outside this component) */
+  :global(.pswp) {
+    --pswp-bg: #05080f;
+    --pswp-placeholder-bg: var(--c-forest);
+    --pswp-icon-color: var(--c-ivory);
+    --pswp-icon-color-secondary: var(--c-ink);
+  }
+
+  :global(.pswp__caption) {
+    position: absolute;
+    left: 50%;
+    bottom: 1.5rem;
+    max-width: min(46rem, 90vw);
+    translate: -50% 0;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--c-ivory-dim);
+    opacity: 0;
+    transition: opacity 0.6s var(--ease);
+  }
+
+  :global(.pswp[data-ready] .pswp__caption) {
+    opacity: 1;
+  }
+
+  :global(.pswp__caption strong) {
+    display: block;
+    font: 500 1.3rem var(--f-serif);
+    color: var(--c-ivory);
+  }
+</style>

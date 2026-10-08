@@ -1,0 +1,30 @@
+---
+/** Decorative gilt divider: two hairlines, two lozenges and a central star. */
+---
+
+<svg class="ornament" viewBox="0 0 240 24" aria-hidden="true" data-reveal>
+  <defs>
+    <linearGradient id="ornament-fade-l" x1="0" x2="1">
+      <stop offset="0" stop-color="currentColor" stop-opacity="0"></stop>
+      <stop offset="1" stop-color="currentColor"></stop>
+    </linearGradient>
+    <linearGradient id="ornament-fade-r" x1="1" x2="0">
+      <stop offset="0" stop-color="currentColor" stop-opacity="0"></stop>
+      <stop offset="1" stop-color="currentColor"></stop>
+    </linearGradient>
+  </defs>
+  <path d="M0 12H96" stroke="url(#ornament-fade-l)"></path>
+  <path d="M144 12H240" stroke="url(#ornament-fade-r)"></path>
+  <path d="M84 12l4-4 4 4-4 4z M148 12l4-4 4 4-4 4z" fill="none" stroke="currentColor"></path>
+  <path d="M120 3l2 7 7 2-7 2-2 7-2-7-7-2 7-2z" fill="var(--c-gold-hi)"></path>
+</svg>
+
+<style>
+  .ornament {
+    width: 240px;
+    height: 24px;
+    margin: 0 auto 3rem;
+    color: var(--c-gold);
+    stroke-width: 1;
+  }
+</style>

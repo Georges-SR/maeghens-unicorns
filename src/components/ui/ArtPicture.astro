@@ -1,0 +1,52 @@
+---
+/**
+ * Responsive artwork image (AVIF sources, WebP fallback, sized srcset) built from a content `Artwork`.
+ * `parallax` makes the image slide inside its frame on scroll; the frame must clip overflow.
+ */
+import { Picture } from 'astro:assets';
+import type { Artwork } from '@/content/types';
+
+interface Props {
+  art: Artwork;
+  /** The `sizes` attribute: how wide the image renders at each breakpoint. */
+  sizes: string;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  parallax?: boolean;
+}
+
+const { art, sizes, class: className, loading = 'lazy', parallax = false } = Astro.props;
+const widths = [480, 768, 1080, 1440, 2000].filter((w) => w <= art.image.width);
+---
+
+<Picture
+  src={art.image}
+  alt={art.alt}
+  formats={['avif']}
+  fallbackFormat="webp"
+  widths={widths}
+  sizes={sizes}
+  loading={loading}
+  decoding="async"
+  class:list={['art', { 'art--invert': art.invert }, className]}
+  data-parallax-img={parallax ? '' : undefined}
+/>
+
+<style is:global>
+  /* let the <img> size itself against the frame, as if <picture> weren't there */
+  picture:has(> img.art) {
+    display: contents;
+  }
+
+  .art {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* line drawings on white paper become ivory lines on the night */
+  .art--invert {
+    filter: invert(1) sepia(0.35) brightness(0.9);
+    mix-blend-mode: screen;
+  }
+</style>

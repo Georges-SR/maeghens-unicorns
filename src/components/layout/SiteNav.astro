@@ -1,0 +1,150 @@
+---
+/**
+ * Fixed top bar: brand, section links, and a gilt scroll-progress hairline.
+ * Behaviour (hide on scroll down, active section, progress) lives in scripts/sections/nav.ts.
+ */
+import { sections, site } from '@/content/site';
+---
+
+<div class="progress" aria-hidden="true">
+  <span class="progress__bar"></span>
+</div>
+
+<header class="nav" data-nav>
+  <a class="nav__brand" href="#top" aria-label={`${site.title}, back to top`}>
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M4 28 L22 6"></path>
+      <path d="M8.5 22.5 l2.4 1.2 M11.5 18.7 l2.4 1.2 M14.5 14.9 l2.4 1.2 M17.5 11.1 l2.4 1.2"></path>
+      <circle cx="24" cy="4" r="1.6"></circle>
+    </svg>
+    <span>{site.shortTitle}</span>
+  </a>
+  <nav aria-label="Sections">
+    <ul class="nav__links">
+      {sections.map((s) => (
+        <li>
+          <a href={`#${s.id}`} data-nav-link={s.id}>
+            {s.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<script>
+  import { initNav } from '@/scripts/sections/nav';
+  initNav();
+</script>
+
+<style>
+  .progress {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: var(--z-progress);
+    height: 2px;
+    pointer-events: none;
+  }
+
+  .progress__bar {
+    display: block;
+    height: 100%;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    background: linear-gradient(90deg, var(--c-lapis-hi), var(--c-gold-hi), var(--c-gold));
+    box-shadow: 0 0 12px rgb(241 217 154 / 0.7);
+  }
+
+  .nav {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: var(--z-nav);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    height: var(--nav-h);
+    padding: 0 var(--gutter);
+    border-bottom: 1px solid transparent;
+    transition:
+      background-color 0.5s,
+      border-color 0.5s,
+      backdrop-filter 0.5s;
+  }
+
+  .nav:global(.is-scrolled) {
+    background: rgb(7 11 20 / 0.72);
+    backdrop-filter: blur(14px) saturate(1.2);
+    border-color: var(--c-line-soft);
+  }
+
+  .nav__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--c-ivory);
+    text-decoration: none;
+    font: 500 1.35rem/1 var(--f-serif);
+  }
+
+  .nav__brand svg {
+    width: 26px;
+    height: 26px;
+    fill: none;
+    stroke: var(--c-gold);
+    stroke-width: 1.4;
+    stroke-linecap: round;
+  }
+
+  .nav__brand circle {
+    fill: var(--c-gold-hi);
+    stroke: none;
+  }
+
+  .nav__links {
+    display: flex;
+    gap: clamp(0.8rem, 1.8vw, 1.8rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nav__links a {
+    position: relative;
+    padding: 0.4em 0;
+    color: var(--c-ivory-dim);
+    text-decoration: none;
+    font: 400 0.72rem/1 var(--f-sans);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+
+  .nav__links a::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 -2px;
+    height: 1px;
+    background: var(--c-gold);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.5s var(--ease);
+  }
+
+  .nav__links a:hover,
+  .nav__links a:global(.is-active) {
+    color: var(--c-gold-hi);
+  }
+
+  .nav__links a:hover::after,
+  .nav__links a:global(.is-active)::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  @media (max-width: 960px) {
+    .nav__links {
+      display: none;
+    }
+  }
+</style>

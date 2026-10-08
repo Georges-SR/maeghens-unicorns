@@ -1,0 +1,100 @@
+---
+/** "Across cultures": tilting cards, one per tradition. */
+import SectionHeader from '@/components/ui/SectionHeader.astro';
+import { cultures } from '@/content/cultures';
+---
+
+<section class="cultures" id="cultures" aria-labelledby="cultures-title">
+  <SectionHeader
+    sectionId="cultures"
+    eyebrow="Across cultures"
+    title="One horn, <em>many kingdoms</em>"
+    lede="Almost every great civilization imagined a one-horned animal. They did not agree on what it was — only that it was rare, strong, and meant something."
+  />
+  <div class="cultures__grid">
+    {cultures.map((c) => (
+      <article class="card" data-tilt data-reveal>
+        <span class="card__glyph" aria-hidden="true">
+          {c.glyph}
+        </span>
+        <p class="card__region label">{c.region}</p>
+        <h3>{c.name}</h3>
+        <p class="card__body" set:html={c.body} />
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  .cultures {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: clamp(5rem, 14vh, 9rem) var(--gutter);
+  }
+
+  .cultures__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: 1.5rem;
+  }
+
+  .card {
+    --mx: 50%;
+    --my: 50%;
+    position: relative;
+    overflow: hidden;
+    padding: 2.4rem 2rem 2.2rem;
+    border: 1px solid rgb(201 164 92 / 0.14);
+    border-radius: 20px;
+    background:
+      radial-gradient(420px circle at var(--mx) var(--my), rgb(241 217 154 / 0.1), transparent 45%),
+      var(--g-panel);
+    box-shadow: 0 30px 60px -40px rgb(0 0 0 / 0.9);
+    transform-style: preserve-3d;
+    transition:
+      border-color 0.4s,
+      box-shadow 0.6s var(--ease);
+  }
+
+  .card:hover {
+    border-color: rgb(201 164 92 / 0.4);
+    box-shadow:
+      0 40px 80px -40px rgb(0 0 0 / 1),
+      0 0 0 1px rgb(201 164 92 / 0.1);
+  }
+
+  .card__glyph {
+    position: absolute;
+    right: 1.2rem;
+    top: 0.2rem;
+    font: 400 6.5rem/1 var(--f-serif);
+    color: rgb(201 164 92 / 0.09);
+    transform: translateZ(40px);
+    pointer-events: none;
+    transition: color 0.6s;
+  }
+
+  .card:hover .card__glyph {
+    color: rgb(201 164 92 / 0.2);
+  }
+
+  .card__region {
+    margin: 0 0 0.9rem;
+    color: var(--c-lapis-hi);
+  }
+
+  .card h3 {
+    margin-bottom: 1rem;
+    transform: translateZ(24px);
+  }
+
+  .card__body {
+    margin: 0;
+    font-size: 0.98rem;
+    color: var(--c-ivory-dim);
+  }
+
+  .card__body :global(em) {
+    color: var(--c-ivory);
+  }
+</style>
