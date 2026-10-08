@@ -231,7 +231,7 @@ const first = timeline[0]?.marker ?? '';
     width: max-content;
     max-width: none;
     margin: 0;
-    padding: 1.5rem 30vw 2.5rem max(var(--gutter), calc((100vw - var(--maxw)) / 2 + var(--gutter)));
+    padding: 1.5rem var(--gutter) 2.5rem max(var(--gutter), calc((100vw - var(--maxw)) / 2 + var(--gutter)));
     will-change: transform;
   }
 
@@ -246,8 +246,13 @@ const first = timeline[0]?.marker ?? '';
     opacity: 0.25;
   }
 
+  /*
+   * A fixed width, not just a flex-basis: newer engines size a max-content flex row from each
+   * item's unwrapped text, which would make the track several times wider than its cards.
+   */
   .timeline:global(.is-horizontal) .event {
-    flex: 0 0 360px;
+    flex: none;
+    width: 360px;
     padding: 1.7rem 1.6rem 1.8rem;
   }
 

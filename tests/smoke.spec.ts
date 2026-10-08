@@ -83,6 +83,46 @@ test.describe('Maeghen’s Unicorns', () => {
   });
 });
 
+test.describe('origins timeline (desktop)', () => {
+  /** Scroll to a fraction of the pinned timeline and return the last card's box. */
+  async function lastCardAt(page: Page, fraction: number) {
+    const range = await page.evaluate(() => {
+      const spacer = document.querySelector('[data-timeline]')!.parentElement!;
+      const top = spacer.getBoundingClientRect().top + scrollY;
+      return { top, length: spacer.offsetHeight - innerHeight };
+    });
+    await page.evaluate((y) => window.scrollTo(0, y), range.top + range.length * fraction);
+    await page.waitForTimeout(1500); // let the scrub catch up
+    return page.locator('[data-timeline-track] > li').last().boundingBox();
+  }
+
+  for (const inflated of [false, true]) {
+    test(`travel ends on the last card${inflated ? ' even if the track is inflated' : ''}`, async ({
+      page,
+    }, info) => {
+      test.skip(info.project.name !== 'desktop', 'desktop layout only');
+      await page.goto('./');
+      await page.waitForFunction(() => document.documentElement.dataset['ready'] === 'true');
+      if (inflated) {
+        // Simulate engines that size the max-content track from unwrapped text.
+        await page.addStyleTag({ content: '[data-timeline-track] { width: 20000px !important; }' });
+        await page.evaluate(() => window.dispatchEvent(new Event('resize')));
+        await page.waitForTimeout(500);
+      }
+      const viewport = page.viewportSize()!;
+
+      // Half-way through, the last card is still to come…
+      const mid = await lastCardAt(page, 0.5);
+      expect(mid!.x).toBeGreaterThan(viewport.width);
+
+      // …and at the end it rests fully on screen, not scrolled away into empty space.
+      const end = await lastCardAt(page, 1);
+      expect(end!.x).toBeGreaterThan(0);
+      expect(end!.x + end!.width).toBeLessThanOrEqual(viewport.width);
+    });
+  }
+});
+
 test.describe('reduced motion', () => {
   test('shows all content without staging or pinning', async ({ page }, info) => {
     test.skip(info.project.name !== 'reduced-motion', 'reduced-motion project only');

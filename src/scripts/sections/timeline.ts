@@ -23,7 +23,15 @@ export function initTimeline(root: HTMLElement): void {
     primeImages(root);
     // Cards are revealed by the horizontal motion itself; take them out of the global reveals.
     for (const card of events) card.removeAttribute('data-reveal');
-    const distance = () => track.scrollWidth - window.innerWidth;
+    // How far the track travels: until the last card's right edge rests at 70% of the screen.
+    // Measured from the card itself (offsetLeft ignores transforms), never from scrollWidth,
+    // which some engines inflate with invisible width (see Timeline.astro).
+    const lastCard = events[events.length - 1]!;
+    const distance = () => {
+      const trackLeft = track.getBoundingClientRect().left - Number(gsap.getProperty(track, 'x'));
+      const lastRight = trackLeft + lastCard.offsetLeft + lastCard.offsetWidth;
+      return Math.max(0, lastRight - window.innerWidth * 0.7);
+    };
 
     const scroller = gsap.to(track, {
       x: () => -distance(),
