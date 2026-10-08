@@ -67,7 +67,7 @@ Texture: subtle film grain, gilt hairlines, ornamental dividers.
 - [x] M1 — plan & design system
 - [x] M2 — build all sections
 - [x] M3 — polish: motion, responsive, a11y, performance (first pass)
-- [ ] M4 — publish to GitHub Pages
+- [x] M4 — publish to GitHub Pages — https://georges-sr.github.io/maeghens-unicorns/
 
 ## Later ideas
 
